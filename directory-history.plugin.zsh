@@ -1,8 +1,12 @@
 zmodload zsh/datetime
 
+SCRIPTPATH="$(
+        cd "$(dirname "$0")"
+        pwd -P
+)"
 # Generates a new history for the current directory
 function generate_history() {
-  history_dir=("${(@ps.\0\n.)$(dirhist -a -d $PWD)}")
+  history_dir=("${(@ps.\0\n.)$($SCRIPTPATH/dirhist -a -d $PWD)}")
   MAX_INDEX_HISTORY=$#history_dir
   (( INDEX_HISTORY = $#history_dir + 1 ))
 
@@ -17,7 +21,7 @@ function log_command() {
 
 # Refresh substring search
 function refresh_substring_search_matches() {
-  _history_substring_search_matches=("${(@f)$(dirhist -s "${_history_substring_search_query_escaped}" -d $PWD)}")
+  _history_substring_search_matches=("${(@f)$($SCRIPTPATH/dirhist -s "${_history_substring_search_query_escaped}" -d $PWD)}")
 }
 
 # Reset $_history_substring_search_result after every command
@@ -41,7 +45,7 @@ preexec_functions=(${preexec_functions[@]} "generate_history")
 preexec_functions=(${preexec_functions[@]} "reset_substring_search")
 
 # generate_history() gets executed after the following so we have to generate it here to get access to $history_dir
-history_dir=("${(@ps.\0\n.)$(dirhist -a -d $PWD)}")
+history_dir=("${(@ps.\0\n.)$($SCRIPTPATH/dirhist -a -d $PWD)}")
 
 directory-history-search-forward() {
   # Go forward as long as possible; Last command is at $history_dir[1]
@@ -290,7 +294,7 @@ function _history-substring-search-begin() {
     #      options. They can be turned off by (ON).
     #
     #_history_substring_search_matches=(${(kon)history[(R)(#$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)*${_history_substring_search_query_escaped}*]})
-    _history_substring_search_matches=("${(@f)$(dirhist -s "${_history_substring_search_query_escaped}" -d $PWD)}")
+    _history_substring_search_matches=("${(@f)$($SCRIPTPATH/dirhist -s "${_history_substring_search_query_escaped}" -d $PWD)}")
     if [[ $#_history_substring_search_matches -eq 0 || $_history_substring_search_matches[1] == "NONE" ]]; then
       _history_substring_search_matches=()
     fi
